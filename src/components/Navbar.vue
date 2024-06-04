@@ -4,10 +4,11 @@
             <a class="navbar-brand" href="#">My Vue</a>
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <navbar-link v-for="(page, index) in publishedPages" class="nav-item" :key="index" :page="page"
-                    :index="index" :isActive="activePage === index" @actived="$emit('actived')"></navbar-link>
+                    :index="index"></navbar-link>
 
                 <li>
-                    <router-link to= "/create" class="nav-link" aria-current="page">Create Page</router-link>
+                    <router-link to="/pages" class="nav-link" aria-current="page"
+                        active-class="active">Pages</router-link>
                 </li>
             </ul>
             <form class="d-flex">
@@ -20,22 +21,38 @@
 </template>
 
 <script>
+import data from '@/data';
 import NavbarLink from './NavbarLink.vue';
 
 export default {
     components: { NavbarLink },
+    inject: ['$pages', '$bus'],
     created() {
         this.getThemeSetting();
+
+        this.pages = this.$pages.getAllPages();
+
+        this.$bus.$on('page-updated', () => {
+            this.pages = [... this.$pages.getAllPages()];
+        });
+        
+        this.$bus.$on('page-created', () => {
+            this.pages = [... this.$pages.getAllPages()];
+        });
+
+        this.$bus.$on('page-deleted', () => {
+            this.pages = [... this.$pages.getAllPages()];
+        });
     },
     computed: {
         publishedPages() {
             return this.pages.filter(p => p.published);
         }
     },
-    props: ["pages", "activePage"],
     data() {
         return {
             theme: "dark",
+            data: []
         };
     },
     methods: {
